@@ -100,7 +100,7 @@ class Matrix:
         r, c = key
         self.cols[c][r] = value
         self.rows[r][c] = value
-        self.components[self.rows_num * r + c] = value
+        self.components[self.cols_num * r + c] = value
 
     def __repr__(self):
         s = ('{:8.3f}' * self.cols_num + '\n') * self.rows_num
