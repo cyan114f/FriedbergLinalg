@@ -1,4 +1,5 @@
 from array import array
+import itertools
 
 
 class Vector:
@@ -63,7 +64,11 @@ class Vector:
         return -self + other
 
     def transpose(self):
-        return Matrix(self)
+        return Matrix([self])
+
+    @staticmethod
+    def zero_vector(size):
+        return Vector([0] * size)
 
 
 class Matrix:
@@ -108,7 +113,7 @@ class Matrix:
         if other == 0:
             return self
         if self.rows_num == other.rows_num and self.cols_num == other.cols_num:
-            return Matrix([i + j for i, j in zip(self.cols, other.cols)])
+            return Matrix([i + j for i, j in zip(self.rows, other.rows)])
         else:
             raise NotImplementedError
 
@@ -132,6 +137,18 @@ class Matrix:
     def __rmul__(self, other):
         return self * other
 
+    def __pos__(self):
+        return self
+
+    def __neg__(self):
+        return -1 * self
+
+    def __sub__(self, other):
+        return self + -other
+
+    def __rsub__(self, other):
+        return -self + other
+
     def transpose(self):
         return Matrix(self.cols)
 
@@ -143,3 +160,57 @@ class Matrix:
         for i in range(self.rows_num):
             tr += self[i, i]
         return tr
+
+    @staticmethod
+    def zero_matrix(size):
+        row, col = size
+        return Matrix([Vector.zero_vector(col) for _ in range(row)])
+
+
+class Polynomial:
+    def __init__(self, coefficients):
+        self.coeffs = Vector(coefficients)
+        self.degree = len(self.coeffs) - 1
+
+    def __repr__(self):
+        s = ''
+        for i in range(len(self.coeffs)):
+            if i == 0:
+                s += str(self.coeffs[i]) + ' + '
+            else:
+                s += '(' + str(self.coeffs[i]) + ')'
+                s += ' x' + str(i) + ' + '
+        return s[:-3]
+
+    def __str__(self):
+        return repr(self)
+
+    def __add__(self, other):
+        if other == 0:
+            return self
+        try:
+            pairs = itertools.zip_longest(self.coeffs, other.coeffs, fillvalue=0)
+            return Polynomial(a + b for a, b in pairs)
+        except TypeError:
+            return NotImplemented
+
+    def __radd__(self, other):
+        return self + other
+
+    def __mul__(self, scalar):
+        return Polynomial(self.coeffs * scalar)
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __pos__(self):
+        return self
+
+    def __neg__(self):
+        return -self
+
+    def __sub__(self, other):
+        return self + -other
+
+    def __rsub__(self, other):
+        return -self + other
